@@ -123,47 +123,40 @@
         <!-- Image -->
         <form action="/" method="POST" enctype="multipart/form-data" id='form'>
             <!-- <input type="file" name="file" id="fileinput" style="display: none;" accept="image/*"> -->
-            <h3>Detect Image</h3>
+            <h3>Detect Image, Video</h3>
             <input class='upload_button' id="upload_button" type="file" name="method1">
-            <input type="submit">
-        </form>
-        <!-- Video -->
-        <form action="/" method="POST" enctype="multipart/form-data" id='form'>
-            <!-- <input type="file" name="file" id="fileinput" style="display: none;" accept="image/*"> -->
-            <h3>Detect Video</h3>
-            <input class='upload_button' id="upload_button" type="file" name="method2">
-            <input type="submit">
-        </form>
-        <!-- Camera -->
-        <form action="/" method="POST" enctype="multipart/form-data" id='form'>
-            <!-- <input type="file" name="file" id="fileinput" style="display: none;" accept="image/*"> -->
-            <h3>Detect Camera</h3>
-            <button class='upload_button' id="upload_button" name="method3">Detect Camera</button>
             <input type="submit">
         </form>
         <div class='upload_hint' id='upload_hint'>
             Các định dạng được hỗ trợ: PNG, JPG, MP4.
     </div>
-
+    {%if file != 0%}
+        {% if file == 1 %}
+            <video id="video" width="640" height="480" autoplay></video>
+        {% elif file.split('.')[-1] in img_end %}
+            <img style="max-width:560px; border-radius:1rem" src="{{ url_for('static', filename=file) }}" alt="User Image">
+        {% elif file.split('.')[-1] in video_end %}
+            <video width="560" height="560" controls>
+                <source src="{{ url_for('static', filename=file) }}" type="video/mp4">
+            </video>
+        {% endif %}
+    {% endif%}
 </div>
-
-<!-- <div class='result_part'>
-    {% if msg %}
-    <div class='result_title'><b>Kết quả nhận diện</b></div>
-    <div class='result_id'>{{ msg }}</div>
-    {% if ndet > 0 %}
-    <div class='result_id'>Nhận diện được <span class='result_id_number'>{{ ndet }} vật thể</span></div>
-    {% endif %}
-    {% if user_image %}
-    <img style="max-width:560px; border-radius:1rem" src="{{ url_for('static', filename=user_image) }}?{{ rand }}"
-            alt="User Image">
-    {% endif %}
-    {% endif %}
-</div> -->
 <div class='footer'>
 
 </div>
+
+<script>
+    var video = document.getElementById('video');
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+     navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+     video.src = window.URL.createObjectURL(stream);
+     video.play();
+     });
+    }
+</script>
 </body>
+
 
 
 </html>

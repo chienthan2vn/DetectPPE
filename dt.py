@@ -51,8 +51,11 @@ def img(url):
 #detect video
 def video(url):
     frame = cv2.VideoCapture(url)
+    fps = frame.get(cv2.CAP_PROP_FPS)
+    img_array = []
     while True:
         ret, img = frame.read()
+        if not ret: break
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         detect = model(img)
         im = detect.render()[0]
@@ -71,7 +74,45 @@ def video(url):
             cv2.putText(im, 'Thieu ' + str(nguoi-ao) + ' ao', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (232, 71, 71),2)
         if nguoi > mu:
             cv2.putText(im, 'Thieu ' + str(nguoi-mu) + ' mu', (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.6, (232, 71, 71),2)
-        cv2.imshow('gg', cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
+        
+        height, width, _ = im.shape
+        size = (width,height)
+        new = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        img_array.append(new)
+        # cv2.imshow('video', new)
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
+    
+    out = cv2.VideoWriter(url, cv2.VideoWriter_fourcc(*'H264'), fps, size)
+    for i in range(len(img_array)):
+        out.write(img_array[i])
+    out.release()
+
+def webcam():
+    frame = cv2.VideoCapture(0)
+    while True:
+        _, img = frame.read()
+        img = cv2.flip(img, 1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        detect = model(img)
+        im = detect.render()[0]
+        rs = detect.pandas().xyxy[0].to_dict(orient="records")
+        ar = np.array(rs)
+        # print(ar)
+        nguoi, mu, ao = 0, 0, 0
+        for i in ar:
+            if i['name'] == 'Nguoi':
+                nguoi += 1
+            elif i['name'] == 'vest':
+                ao += 1
+            else:
+                mu += 1
+        if nguoi > ao:
+            cv2.putText(im, 'Thieu ' + str(nguoi-ao) + ' ao', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.6, (232, 71, 71),2)
+        if nguoi > mu:
+            cv2.putText(im, 'Thieu ' + str(nguoi-mu) + ' mu', (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.6, (232, 71, 71),2)
+        cv2.imshow('Camera', cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
         if cv2.waitKey(1) == ord("q"):
             break
+
 # video(0)
